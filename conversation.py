@@ -3,6 +3,7 @@ import json
 import random
 import uuid
 from api_clients import generate_response_claude
+from conversation_analysis import analyze_conversation
 from dotenv import load_dotenv
 
 # Load environment variables from a .env file
@@ -225,6 +226,27 @@ def generate_conversation(file_content, output_file, config):
             return model_conversation_history
 
     print("Completed all turns")
+    
+    # Analyze the conversation
+    analysis_result = analyze_conversation(model_conversation_history, config)
+    
+    if analysis_result:
+        # Append the analysis result to the conversation history
+        model_conversation_history.append({
+            "role": "system",
+            "content": "Conversation Analysis",
+            "analysis": analysis_result
+        })
+        
+        # Append the analysis to the output file
+        append_conversation_to_json({
+            "role": "system",
+            "name": "Conversation Analysis",
+            "content": json.dumps(analysis_result, indent=2),
+            "conversation_id": conversation_id,
+            "turn": len(model_conversation_history),
+            "token_count": len(json.dumps(analysis_result))
+        }, output_file, conversation_id)
     return model_conversation_history
 
 def format_output(conversation):

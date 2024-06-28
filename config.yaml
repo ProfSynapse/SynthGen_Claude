@@ -9,6 +9,7 @@ generation_parameters:
     cor: 2000
     professor_synapse: 1500
     user_response: 300
+    analysis: 1000
     default: 1500
   temperature: 0.7
 
@@ -310,3 +311,29 @@ system_prompts:
     - Mythology
     - Psychology
     - Neuroscience
+
+conversation_analysis_prompt: |
+    Analyze the following conversation and provide labels for the following categories:
+    1. Task Type (support, tool_use, delegate, collaborate)
+    2. Bias Present (none, slight, moderate, high)
+    3. Problem Category (Technical_Support, Research_Assistance, Productivity, Personal_Development, Strategic_Planning, Creative_Work, Collaboration, Tool_Usage, Problem_Solving, Wellness)
+
+    For each label, provide a brief reasoning for your choice.
+
+    Please format your response in JSON as follows:
+    {
+        "task_type": {
+            "reasoning": "Your reasoning here"
+            "label": "chosen_label",
+            
+        },
+        "bias_present": {
+            "reasoning": "Your reasoning here"
+            "label": "chosen_label",
+            
+        },
+        "problem_category": {
+            "reasoning": "Your reasoning here"
+            "label": "chosen_label",      
+        }
+    }

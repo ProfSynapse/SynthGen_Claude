@@ -1,5 +1,3 @@
-# api_clients.py
-
 import os
 from dotenv import load_dotenv
 from anthropic import Anthropic
