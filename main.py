@@ -5,7 +5,6 @@ import shutil
 from config import load_config
 from conversation import generate_conversation, format_output
 from file_utils import read_file, load_processed_files, save_processed_file
-from anthropic import exceptions
 from datetime import datetime
 
 def process_file(file_path, config, processed_files_file):
@@ -45,9 +44,8 @@ def process_file(file_path, config, processed_files_file):
                 conversations.append(formatted_output)
                 save_processed_file(processed_files_file, file_path)
                 print(f"Processed file {file_path} and appended to processed_files.txt")
-        except exceptions.APIException as e:
-            print(str(e))
-            print("Error with Claude API. Please try again later.")
+        except Exception as e:
+            print(f"Error processing file: {str(e)}")
             return conversations
     
     print(f"Finished processing file: {file_path}")

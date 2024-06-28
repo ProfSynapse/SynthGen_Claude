@@ -1,11 +1,8 @@
-# conversation.py
-
 import os
 import json
 import random
 import uuid
 from api_clients import generate_response_claude
-from anthropic import exceptions
 from dotenv import load_dotenv
 
 # Load environment variables from a .env file
@@ -33,7 +30,18 @@ def generate_response(role, message, response_type=None, model_conversation_hist
 
     max_tokens = config['generation_parameters']['max_tokens'].get(response_type or role, config['generation_parameters']['max_tokens']['default'])
 
-    return generate_response_claude(model_conversation_history, role, message, config['claude_details']['model_id'], config['generation_parameters']['temperature'], max_tokens)
+    try:
+        return generate_response_claude(
+            model_conversation_history or [],
+            role,
+            message,
+            config['claude_details']['model_id'],
+            config['generation_parameters']['temperature'],
+            max_tokens
+        )
+    except Exception as e:
+        print(f"Error generating response from Claude: {str(e)}")
+        return None
 
 def append_conversation_to_json(conversation, output_file, conversation_id):
     """
@@ -101,7 +109,7 @@ def generate_and_append_response(role, prompt, model_conversation_history, user_
         # If the roles would be the same, insert a user message
         interim_prompt = f"Based on the last response, what would be a good follow-up question or comment?"
         interim_response = generate_response("user", interim_prompt, model_conversation_history=model_conversation_history, config=config)
-        model_conversation_history.append({"role": "user", "content": interim_response, "name": "System"})
+        model_conversation_history.append({"role": "user", "content": interim_response})
         user_conversation_history.append({"role": "user", "content": interim_response, "name": "System"})
         append_conversation_to_json({"role": "user", "name": "System", "content": interim_response, "conversation_id": conversation_id, "turn": turn, "token_count": len(interim_response)}, output_file, conversation_id)
         last_role = "user"
@@ -114,7 +122,7 @@ def generate_and_append_response(role, prompt, model_conversation_history, user_
     if name == assistant_name:
         response = f"{config['character_names']['assistant_prefix']}: {response}"
 
-    model_conversation_history.append({"role": role, "content": response, "name": name})
+    model_conversation_history.append({"role": role, "content": response})
     
     if role == "user" or name == assistant_name:
         user_conversation_history.append({"role": role, "content": response, "name": name})
@@ -165,7 +173,7 @@ def generate_conversation(file_content, output_file, config):
 
     for turn in range(1, num_turns + 1):
         print(f"Generating CoR response for turn {turn}")
-        cor_prompt = f"{config['system_prompts']['cor_system_prompt']}\n\nConversation History:\n{model_conversation_history}\n\nFilled-in CoR:"
+        cor_prompt = f"{config['system_prompts']['cor_system_prompt']}\n\nConversation History:\n{json.dumps(model_conversation_history)}\n\nFilled-in CoR:"
         cor_response, last_role = generate_and_append_response(
             "assistant",
             cor_prompt,
@@ -181,7 +189,7 @@ def generate_conversation(file_content, output_file, config):
             return model_conversation_history
 
         print(f"Generating {assistant_name} response for turn {turn}")
-        synapse_prompt = f"{config['system_prompts']['synapse_system_prompt']}\n\nConversation History:\n{model_conversation_history}\n\n{config['character_names']['assistant_prefix']}:"
+        synapse_prompt = f"{config['system_prompts']['synapse_system_prompt']}\n\nConversation History:\n{json.dumps(model_conversation_history)}\n\n{config['character_names']['assistant_prefix']}:"
         synapse_response, last_role = generate_and_append_response(
             "assistant",
             synapse_prompt,
@@ -197,7 +205,7 @@ def generate_conversation(file_content, output_file, config):
             return model_conversation_history
 
         # User follow-up prompt without file content access but using the system prompt and previous user conversation history
-        user_followup_prompt = f"{config['system_prompts']['user_system_prompt']}\n\nConversation History:\n{user_conversation_history}\n\nBased on {assistant_name}'s previous response, ask a specific NEW question that builds upon the information provided and helps deepen your understanding of the topic. Respond in first person as {user_name}:"
+        user_followup_prompt = f"{config['system_prompts']['user_system_prompt']}\n\nConversation History:\n{json.dumps(user_conversation_history)}\n\nBased on {assistant_name}'s previous response, ask a specific NEW question that builds upon the information provided and helps deepen your understanding of the topic. Respond in first person as {user_name}:"
         user_followup_response, last_role = generate_and_append_response(
             "user",
             user_followup_prompt,
