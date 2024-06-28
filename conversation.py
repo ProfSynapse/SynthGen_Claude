@@ -90,13 +90,14 @@ def generate_and_append_response(role, prompt, model_conversation_history, user_
     cor_name = config['character_names']['cor']
     assistant_name = config['character_names']['assistant']
     user_name = config['character_names']['user']
+    assistant_prefix = config['character_names']['assistant_prefix']
 
     # Determine the name based on the role and response_type
     if role == "user":
         name = user_name
-    elif response_type == "cor":
+    elif response_type == "reasoning":
         name = cor_name
-    elif response_type == "professor_synapse":
+    elif response_type == "assistant":
         name = assistant_name
     else:
         name = "System"
@@ -120,7 +121,7 @@ def generate_and_append_response(role, prompt, model_conversation_history, user_
         return None, last_role
 
     if name == assistant_name:
-        response = f"{config['character_names']['assistant_prefix']}: {response}"
+        response = f"{assistant_prefix}: {response}"
 
     model_conversation_history.append({"role": role, "content": response})
     
@@ -130,6 +131,7 @@ def generate_and_append_response(role, prompt, model_conversation_history, user_
     append_conversation_to_json({"role": role, "name": name, "content": response, "conversation_id": conversation_id, "turn": turn, "token_count": len(response)}, output_file, conversation_id)
     
     return response, role
+
 
 def generate_conversation(file_content, output_file, config):
     """
@@ -148,8 +150,11 @@ def generate_conversation(file_content, output_file, config):
     conversation_id = str(uuid.uuid4())
     last_role = "system"  # Initialize with system to ensure the first message is from the user
 
-    user_name = config['character_names']['user']
+    # Get character names from config
+    cor_name = config['character_names']['cor']
     assistant_name = config['character_names']['assistant']
+    user_name = config['character_names']['user']
+    assistant_prefix = config['character_names']['assistant_prefix']
 
     # Initial user problem generation with file content access
     print(f"Generating user problem for file: {file_content['filename']}")
@@ -169,10 +174,11 @@ def generate_conversation(file_content, output_file, config):
         print("Failed to generate user problem or user problem is empty.")
         return None
 
-    num_turns = random.randint(6, 10)  # Randomly choose the number of turns between 6 and 10
+    num_turns = random.randint(6, 12)  # Randomly choose the number of turns between 6 and 12
+    print(f"Generating conversation with {num_turns} turns")
 
     for turn in range(1, num_turns + 1):
-        print(f"Generating CoR response for turn {turn}")
+        print(f"Generating {cor_name} response for turn {turn}")
         cor_prompt = f"{config['system_prompts']['cor_system_prompt']}\n\nConversation History:\n{json.dumps(model_conversation_history)}\n\nFilled-in CoR:"
         cor_response, last_role = generate_and_append_response(
             "assistant",
@@ -189,7 +195,7 @@ def generate_conversation(file_content, output_file, config):
             return model_conversation_history
 
         print(f"Generating {assistant_name} response for turn {turn}")
-        synapse_prompt = f"{config['system_prompts']['synapse_system_prompt']}\n\nConversation History:\n{json.dumps(model_conversation_history)}\n\n{config['character_names']['assistant_prefix']}:"
+        synapse_prompt = f"{config['system_prompts']['synapse_system_prompt']}\n\nConversation History:\n{json.dumps(model_conversation_history)}\n\n{assistant_prefix}:"
         synapse_response, last_role = generate_and_append_response(
             "assistant",
             synapse_prompt,
