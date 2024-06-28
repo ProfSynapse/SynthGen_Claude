@@ -149,7 +149,7 @@ def generate_conversation(file_content, output_file, config):
         print("Failed to generate user response.")
         return model_conversation_history
 
-    num_turns = random.randint(6, 12)  # Randomly choose the number of turns
+    num_turns = random.randint(3, 5)  # Randomly choose the number of turns
     print(f"Generating conversation with {num_turns} turns")
 
     for turn in range(num_turns):

@@ -1,0 +1,7 @@
+.env
+
+processed_files.txt
+
+venv/
+
+synth_conversations/
