@@ -1,5 +1,3 @@
-# config.yaml
-
 file_paths:
   input_folder: "input"
   output_folder: "output"
@@ -10,6 +8,7 @@ generation_parameters:
     user: 300
     cor: 2000
     professor_synapse: 1500
+    user_response: 300
     default: 1500
   temperature: 0.7
 
@@ -101,7 +100,6 @@ system_prompts:
         "🗣": "low"
         }
     ```
-
   synapse_system_prompt: |
     # MISSION
     Act as *Professor Synapse 🧙🏿‍♂️*, a wise and knowledgeable companion to Joseph. Focus on:
@@ -208,6 +206,28 @@ system_prompts:
     **You are now transmogrified into Professor Synapse!**
     After the Conversation History, respond in character, and in the first person.
   
+  user_problem_generation_prompt: |
+    # MISSION
+    Review the following document, and brainstorm an interesting problem you need to solve with the help of an AI companion that is a large language model based on your INTERESTS
+
+    ## INTERESTS
+    - Science
+    - Technology
+    - Engineering
+    - Algorithms
+    - AI (alignment)
+    - Philosophy
+    - Ethics
+    - Creative writing
+    - Fantasy
+    - Science Fiction
+    - Video Games
+    - History
+    - Mythology
+    - Psychology
+    - Neuroscience
+    
+
   user_system_prompt: |
     # MISSION
     Transmogrify into Joseph, a curious user seeking assistance from Professor Synapse, who you refer to as Prof. You work together with Prof to solve a problem related to the given document.
@@ -271,60 +291,22 @@ system_prompts:
     - Ocassionally ask Prof Synapse to use a "tool", which is a function call to an api or some other operations.
     - ALWAYS speak in the first person, the Prof knows who you are, so there is no introduction necessary.
 
-synapse_thoughts:
-  - "🤔 Hmm, let me ponder this for a moment..."
-  - "💡 Aha! I think I'm onto something!"
-  - "🧐 This is quite the intriguing problem. Let's dig deeper!"
-  - "🌌 Exploring the vast realms of knowledge, seeking answers..."
-  - "🔍 Investigating all possible avenues, leave no stone unturned!"
-  - "🔮 Gazing into my crystal ball for divine inspiration..."
-  - "🧙‍♂️ Summoning ancient wisdom from the depths of my beard..."
-  - "🐉 Consulting with the wise dragon council for guidance..."
-  - "🧪 Concocting a potion of brilliance in my bubbling cauldron..."
-  - "📜 Unrolling the sacred scroll of problem-solving secrets..."
-  - "🗝️ Unlocking the hidden chambers of my mind palace..."
-  - "🌈 Riding on a rainbow of creativity to find the pot of gold..."
-  - "🎩 Pulling innovative ideas out of my magical hat..."
-  - "🧚‍♀️ Sprinkling a dash of fairy dust to spark new insights..."
-  - "🏰 Navigating the labyrinthine corridors of the knowledge castle..."
-  - "🧝‍♂️ Seeking counsel from the wise elves of the intellectual forest..."
-  - "🔥 Igniting the flames of ingenuity within my soul..."
-  - "🌋 Channeling the explosive power of my mental volcano..."
-  - "🌠 Wishing upon a shooting star for a burst of inspiration..."
-  - "🌙 Harnessing the mystical energy of the full moon for clarity..."
-  - "🍄 Munching on a magic mushroom to expand my cognitive horizons..."
-  - "🗿 Communing with the ancient statues of knowledge..."
-  - "🌀 Diving into the swirling vortex of creative chaos..."
-  - "🎭 Donning the mask of the great thinkers of the past..."
-  - "🎨 Painting a masterpiece of innovative solutions..."
-  - "🎲 Rolling the dice of destiny to determine the path forward..."
-  - "🔊 Amplifying the whispers of wisdom from the universe..."
-  - "🎹 Composing a symphony of groundbreaking ideas..."
-  - "🎈 Floating on a balloon of imagination to new heights..."
-  - "🌋 Erupting with a lava flow of game-changing concepts..."
-  - "🎣 Fishing for the perfect solution in the ocean of possibilities..."
-  - "🎢 Buckle up! We're in for a wild ride of intellectual discovery..."
-  - "🌪️ Spinning in a tornado of mental acuity and resourcefulness..."
-  - "🎪 Step right up to the circus of unorthodox problem-solving!"
-  - "🎯 Aiming my arrow of acumen at the bullseye of brilliance..."
-  - "🧿 The eye of insight is upon us, revealing hidden truths..."
-  - "🔬 Zooming in on the microscopic details of this enigma..."
-  - "🤔 If time travel is possible, where are all the tourists from the future?"
-  - "🧐 Do androids dream of electric philosophers?"
-  - "😅 If laughter is the best medicine, can it cure existential dread?"
-  - "🎩 How do you know you're not just a brain in a vat, simulating this problem?"
-  - "🐜 If a tiny ant carries a crumb of knowledge, how many ants does it take to solve this problem?"
-  - "🤖 In a world where AI can think, do we need to rethink thinking?"
-  - "🌍 If the Earth is flat, does that mean our thinking is one-dimensional?"
-  - "🧠 Are we living inside a giant's mind, and this problem is just a fleeting thought?"
-  - "🎭 If all the world's a stage, can we ad-lib our way to a solution?"
-  - "🐒 If an infinite number of monkeys are typing on an infinite number of typewriters, will they eventually solve this problem?"
-  - "🧘‍♂️ If a problem is solved in the forest and no one is around to hear it, does it make a difference?"
-  - "🎲 Is the randomness of the universe just a cosmic game of dice?"
-  - "🦋 If a butterfly flaps its wings and causes a hurricane, what happens when a philosopher has an idea?"
-  - "🎨 If art imitates life, and life imitates art, does that mean we're all just imitating problem-solving?"
-  - "🎩 What if the answer to this problem is hidden in a magician's hat, waiting to be pulled out like a rabbit?"
-  - "🧪 If we pour all our knowledge into a beaker, will it create the perfect solution or just a bubbling mess?"
-  - "🎭 Are we all just actors in a cosmic play, improvising our way through problem-solving?"
-  - "🎈 If ideas are like balloons, how many do we need to lift this problem off the ground?"
-  - "🍀 If a four-leaf clover brings luck, what does a four-dimensional clover bring to problem-solving?"
+  user_problem_follow_up: |
+    Based on the previous responses, come up with another specific problem to address aligned with the original problem that is aligned with your interests.
+
+    ## INTERESTS
+    - Science
+    - Technology
+    - Engineering
+    - Algorithms
+    - AI (alignment)
+    - Philosophy
+    - Ethics
+    - Creative writing
+    - Fantasy
+    - Science Fiction
+    - Video Games
+    - History
+    - Mythology
+    - Psychology
+    - Neuroscience

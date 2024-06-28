@@ -1,3 +1,5 @@
+# api_clients.py
+
 import os
 from dotenv import load_dotenv
 from anthropic import Anthropic
@@ -28,8 +30,22 @@ def generate_response_claude(conversation_history, role, message, model_id, temp
 
     client = Anthropic(api_key=claude_api_key)
     try:
-        # Prepare the messages for Claude API
-        messages = conversation_history + [{"role": role, "content": message}]
+        # Ensure the roles alternate
+        messages = []
+        last_role = None
+        for msg in conversation_history:
+            if msg['role'] != last_role:
+                messages.append({"role": msg['role'], "content": msg['content']})
+                last_role = msg['role']
+            else:
+                # If the role is the same, combine the content
+                messages[-1]['content'] += "\n" + msg['content']
+        
+        # Add the new message, ensuring it alternates
+        if messages and messages[-1]['role'] == role:
+            messages[-1]['content'] += "\n" + message
+        else:
+            messages.append({"role": role, "content": message})
 
         response = client.messages.create(
             model=model_id,
@@ -38,11 +54,7 @@ def generate_response_claude(conversation_history, role, message, model_id, temp
             temperature=temperature
         )
         
-        # Extract the text content from the response
-        if response.content and len(response.content) > 0:
-            return response.content[0].text
-        else:
-            return ""
+        return response.content[0].text if response.content else ""
     except Exception as e:
         print(f"Error generating response from Claude: {str(e)}")
         return None
