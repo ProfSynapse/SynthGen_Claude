@@ -8,7 +8,7 @@ load_dotenv()
 # Load API key from environment variable
 claude_api_key = os.getenv('CLAUDE_API_KEY')
 
-def generate_response_claude(conversation_history, role, message, model_id, temperature, max_tokens):
+def generate_response_claude(conversation_history, role, message, model_id, temperature, max_tokens, system_prompt=None):
     """
     Generate a response using Claude's Messages API.
 
@@ -19,6 +19,7 @@ def generate_response_claude(conversation_history, role, message, model_id, temp
         model_id (str): The model ID for Claude.
         temperature (float): Sampling temperature.
         max_tokens (int): Maximum number of tokens to generate.
+        system_prompt (str, optional): System prompt to set context.
 
     Returns:
         str: The generated response.
@@ -28,9 +29,10 @@ def generate_response_claude(conversation_history, role, message, model_id, temp
 
     client = Anthropic(api_key=claude_api_key)
     try:
-        # Ensure the roles alternate
+        # Prepare the messages for Claude API
         messages = []
         last_role = None
+
         for msg in conversation_history:
             if msg['role'] != last_role:
                 messages.append({"role": msg['role'], "content": msg['content']})
@@ -38,23 +40,28 @@ def generate_response_claude(conversation_history, role, message, model_id, temp
             else:
                 # If the role is the same, combine the content
                 messages[-1]['content'] += "\n" + msg['content']
-        
+
         # Add the new message, ensuring it alternates
         if messages and messages[-1]['role'] == role:
             messages[-1]['content'] += "\n" + message
         else:
             messages.append({"role": role, "content": message})
 
-        response = client.messages.create(
-            model=model_id,
-            messages=messages,
-            max_tokens=max_tokens,
-            temperature=temperature
-        )
+        # Create the API request
+        request = {
+            "model": model_id,
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "temperature": temperature
+        }
+
+        # Add system message if present
+        if system_prompt:
+            request["system"] = system_prompt
+
+        response = client.messages.create(**request)
         
         return response.content[0].text if response.content else ""
     except Exception as e:
         print(f"Error generating response from Claude: {str(e)}")
         return None
-
-# You can add more API client functions here if needed

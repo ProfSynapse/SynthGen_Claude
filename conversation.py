@@ -69,15 +69,15 @@ def append_conversation_to_json(conversation, output_file, conversation_id):
 def generate_and_append_response(role, prompt, model_conversation_history, user_conversation_history, output_file, conversation_id, turn, response_type, config):
     print(f"Conversation ID: {conversation_id}, Turn: {turn}, Role: {role}, Response Type: {response_type}")
     
-    cor_name = config['character_names']['cor']
+    gor_name = config['character_names']['gor']
     assistant_name = config['character_names']['assistant']
     user_name = config['character_names']['user']
     assistant_prefix = config['character_names']['assistant_prefix']
 
     # Determine the name based on the role and response_type
-    if response_type == "user_cor" or response_type == "reasoning":
-        name = cor_name
-        api_role = "user" if response_type == "user_cor" else "assistant"
+    if response_type == "user_gor" or response_type == "reasoning":
+        name = gor_name
+        api_role = "user" if response_type == "user_gor" else "assistant"
     elif response_type == "assistant":
         name = assistant_name
         api_role = "assistant"
@@ -106,7 +106,7 @@ def generate_conversation(file_content, output_file, config):
     user_conversation_history = []
     conversation_id = str(uuid.uuid4())
 
-    cor_name = config['character_names']['cor']
+    gor_name = config['character_names']['gor']
     assistant_name = config['character_names']['assistant']
     user_name = config['character_names']['user']
     assistant_prefix = config['character_names']['assistant_prefix']
@@ -149,16 +149,16 @@ def generate_conversation(file_content, output_file, config):
         print("Failed to generate user response.")
         return model_conversation_history
 
-    num_turns = random.randint(3, 5)  # Randomly choose the number of turns
+    num_turns = random.randint(1, 2)  # Randomly choose the number of turns
     print(f"Generating conversation with {num_turns} turns")
 
     for turn in range(num_turns):
-        # 3. CoR response
-        print(f"Turn {turn + 1}, Step 3: Generating {cor_name} Response")
-        cor_prompt = config['system_prompts']['cor_system_prompt']
-        cor_response, _ = generate_and_append_response(
+        # 3. GoR response
+        print(f"Turn {turn + 1}, Step 3: Generating {gor_name} Response")
+        gor_prompt = config['system_prompts']['gor_system_prompt']
+        gor_response, _ = generate_and_append_response(
             "assistant",
-            f"{cor_prompt}\n\nConversation History:\n{json.dumps(model_conversation_history)}\n\nFile Content:\n{file_content['content']}\n\nGenerated Chain of Reasoning response:",
+            f"{gor_prompt}\n\nConversation History:\n{json.dumps(model_conversation_history)}\n\nFile Content:\n{file_content['content']}\n\nGenerated Graph of Reasoning response:",
             model_conversation_history,
             user_conversation_history,
             output_file,
@@ -167,8 +167,8 @@ def generate_conversation(file_content, output_file, config):
             response_type="reasoning",
             config=config
         )
-        if cor_response is None or not cor_response.strip():
-            print(f"Failed to generate {cor_name} response at turn {turn + 1}.")
+        if gor_response is None or not gor_response.strip():
+            print(f"Failed to generate {gor_name} response at turn {turn + 1}.")
             return model_conversation_history
 
         # 4. Professor Synapse response
@@ -227,26 +227,11 @@ def generate_conversation(file_content, output_file, config):
 
     print("Completed all turns")
     
-    # Analyze the conversation
-    analysis_result = analyze_conversation(model_conversation_history, config)
-    
-    if analysis_result:
-        # Append the analysis result to the conversation history
-        model_conversation_history.append({
-            "role": "system",
-            "content": "Conversation Analysis",
-            "analysis": analysis_result
-        })
-        
-        # Append the analysis to the output file
-        append_conversation_to_json({
-            "role": "system",
-            "name": "Conversation Analysis",
-            "content": json.dumps(analysis_result, indent=2),
-            "conversation_id": conversation_id,
-            "turn": len(model_conversation_history),
-            "token_count": len(json.dumps(analysis_result))
-        }, output_file, conversation_id)
+    try:
+        analyze_conversation(output_file, config)
+    except Exception as e:
+        print(f"Error during conversation analysis: {str(e)}")
+
     return model_conversation_history
 
 def format_output(conversation):
